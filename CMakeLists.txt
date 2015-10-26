@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.4)
-project(redox)
+project(pertino-redox)
 
 set(REDOX_VERSION_MAJOR 0)
 set(REDOX_VERSION_MINOR 3)
@@ -215,4 +215,5 @@ set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${ARCHITECTURE}")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "${ARCHITECTURE}")
 # Select CPack generators
 set(CPACK_GENERATOR "DEB" "RPM")
+include(pertino_overrides.cmake)
 include(CPack)
