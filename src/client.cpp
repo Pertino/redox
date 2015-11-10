@@ -279,7 +279,7 @@ void Redox::setExited(bool exited) {
 void Redox::runEventLoop(std::chrono::seconds timeout) {
 
   // Events to connect to Redox
-  if (timeout > REDIS_DEFAULT_TIMEOUT)
+  if (timeout > REDIS_DEFAULT_CONNECT_TIMEOUT)
   {
     std::chrono::seconds now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
     std::chrono::seconds last_run = now;

@@ -46,7 +46,7 @@ public:
   * Same as .connect() on a Redox instance.
   */
   bool connect(const std::string &host = REDIS_DEFAULT_HOST, const int port = REDIS_DEFAULT_PORT,
-               std::function<void(int)> connection_callback = nullptr, std::chrono::seconds timeout = REDIS_DEFAULT_TIMEOUT) {
+               std::function<void(int)> connection_callback = nullptr, std::chrono::seconds timeout = REDIS_DEFAULT_CONNECT_TIMEOUT) {
     return rdx_.connect(host, port, connection_callback, timeout);
   }
 
