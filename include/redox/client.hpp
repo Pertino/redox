@@ -47,6 +47,7 @@ namespace redox {
 static const std::string REDIS_DEFAULT_HOST = "localhost";
 static const int REDIS_DEFAULT_PORT = 6379;
 static const std::string REDIS_DEFAULT_PATH = "/var/run/redis/redis.sock";
+static const std::chrono::seconds REDIS_DEFAULT_TIMEOUT{0};
 
 /**
 * Redox is a Redis client for C++. It provides a synchronous and asynchronous
@@ -96,7 +97,7 @@ public:
   */
   bool connect(const std::string &host = REDIS_DEFAULT_HOST, const int port = REDIS_DEFAULT_PORT,
                std::function<void(int)> connection_callback = nullptr,
-               std::chrono::seconds* timeout = nullptr);
+               std::chrono::seconds timeout = REDIS_DEFAULT_TIMEOUT);
 
   /**
   * Connects to Redis over a unix socket and starts an event loop in a separate
@@ -262,7 +263,7 @@ private:
   static void disconnectedCallback(const redisAsyncContext *c, int status);
 
   // Main event loop, run in a separate thread
-  void runEventLoop(std::chrono::seconds* timeout=nullptr);
+  void runEventLoop(std::chrono::seconds timeout = REDIS_DEFAULT_TIMEOUT);
 
   // Return the command map corresponding to the templated reply type
   template <class ReplyT> std::unordered_map<long, Command<ReplyT> *> &getCommandMap();

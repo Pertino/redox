@@ -53,7 +53,7 @@ Redox::Redox(ostream &log_stream, log::Level log_level)
 
 bool Redox::connect(const string &host, const int port,
                     function<void(int)> connection_callback,
-                    std::chrono::seconds* timeout) {
+                    std::chrono::seconds timeout) {
 
   host_ = host;
   port_ = port;
@@ -276,15 +276,15 @@ void Redox::setExited(bool exited) {
   exit_waiter_.notify_one();
 }
 
-void Redox::runEventLoop(std::chrono::seconds* timeout) {
+void Redox::runEventLoop(std::chrono::seconds timeout) {
 
   // Events to connect to Redox
-  if (timeout != nullptr)
+  if (timeout > REDIS_DEFAULT_TIMEOUT)
   {
     std::chrono::seconds now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
     std::chrono::seconds last_run = now;
 
-    while(connect_state_ == NOT_YET_CONNECTED && ((last_run - now) <= *timeout))
+    while(connect_state_ == NOT_YET_CONNECTED && ((last_run - now) < timeout))
     {
       ev_run(evloop_, EVRUN_NOWAIT);
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
