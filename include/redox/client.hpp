@@ -33,6 +33,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <chrono>
 
 #include <hiredis/hiredis.h>
 #include <hiredis/async.h>
@@ -94,7 +95,8 @@ public:
   * true once everything is ready, or false on failure.
   */
   bool connect(const std::string &host = REDIS_DEFAULT_HOST, const int port = REDIS_DEFAULT_PORT,
-               std::function<void(int)> connection_callback = nullptr);
+               std::function<void(int)> connection_callback = nullptr,
+               std::chrono::seconds* timeout = nullptr);
 
   /**
   * Connects to Redis over a unix socket and starts an event loop in a separate
@@ -260,7 +262,7 @@ private:
   static void disconnectedCallback(const redisAsyncContext *c, int status);
 
   // Main event loop, run in a separate thread
-  void runEventLoop();
+  void runEventLoop(std::chrono::seconds* timeout=nullptr);
 
   // Return the command map corresponding to the templated reply type
   template <class ReplyT> std::unordered_map<long, Command<ReplyT> *> &getCommandMap();

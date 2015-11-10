@@ -52,7 +52,8 @@ Redox::Redox(ostream &log_stream, log::Level log_level)
     : logger_(log_stream, log_level), evloop_(nullptr) {}
 
 bool Redox::connect(const string &host, const int port,
-                    function<void(int)> connection_callback) {
+                    function<void(int)> connection_callback,
+                    std::chrono::seconds* timeout) {
 
   host_ = host;
   port_ = port;
@@ -67,7 +68,7 @@ bool Redox::connect(const string &host, const int port,
   if (!initHiredis())
     return false;
 
-  event_loop_thread_ = thread([this] { runEventLoop(); });
+  event_loop_thread_ = thread([this,timeout] { runEventLoop(timeout); });
 
   // Block until connected and running the event loop, or until
   // a connection error happens and the event loop exits
@@ -275,10 +276,35 @@ void Redox::setExited(bool exited) {
   exit_waiter_.notify_one();
 }
 
-void Redox::runEventLoop() {
+void Redox::runEventLoop(std::chrono::seconds* timeout) {
 
   // Events to connect to Redox
-  ev_run(evloop_, EVRUN_ONCE);
+  if (timeout != nullptr)
+  {
+    std::chrono::seconds now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
+    std::chrono::seconds last_run = now;
+
+    while(connect_state_ == NOT_YET_CONNECTED && ((last_run - now) <= *timeout))
+    {
+      ev_run(evloop_, EVRUN_NOWAIT);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+      last_run = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
+    }
+
+    if (connect_state_ == NOT_YET_CONNECTED)
+    {
+      connect_state_ = CONNECT_ERROR;
+      logger_.warning() << "Connect timeout, event loop exiting.";
+      setExited(true);
+      setRunning(false);
+      return;
+    }
+  }
+  else
+  {
+    ev_run(evloop_, EVRUN_ONCE);
+  }
   ev_run(evloop_, EVRUN_NOWAIT);
 
   // Block until connected to Redis, or error
