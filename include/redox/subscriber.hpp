@@ -59,6 +59,14 @@ public:
   }
 
   /**
+   * Sends auth + password on a Redox instance.
+   */
+  bool authenticate(const std::string& password) {
+	  std::vector<std::string> auth_cmds{"AUTH", password};
+	  return rdx_.commandSync(auth_cmds);
+  }
+
+  /**
   * Same as .stop() on a Redox instance.
   */
   void stop();
