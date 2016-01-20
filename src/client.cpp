@@ -397,7 +397,9 @@ void Redox::commandCallback(redisAsyncContext *ctx, void *r, void *privdata) {
 
   Command<ReplyT> *c = rdx->findCommand<ReplyT>(id);
   if (c == nullptr) {
-    freeReplyObject(reply_obj);
+    if (reply_obj != nullptr) {
+      freeReplyObject(reply_obj);
+    }
     return;
   }
 
