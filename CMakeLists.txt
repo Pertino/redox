@@ -33,6 +33,9 @@ find_package(Threads REQUIRED)
 find_package(hiredis REQUIRED)
 find_package(libev REQUIRED)
 
+include_directories(${HIREDIS_INCLUDE_DIRS})
+include_directories(${LIBEV_INCLUDE_DIRS})
+
 set(REDOX_LIB_DEPS
   ${HIREDIS_LIBRARIES}
   ${LIBEV_LIBRARIES}
